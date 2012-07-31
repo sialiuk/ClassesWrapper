@@ -5,12 +5,6 @@
 
 namespace wrapper
 {
-	Thread::ThreadRoutine::ThreadRoutine(const Func& f, const FuncExcept& ex)
-		: m_routine(f)
-		, m_callback(ex)
-	{
-	}
-
 	unsigned int Thread::Callable(void* ptr)
 	{
 		ThreadRoutine* f = static_cast<ThreadRoutine*>(ptr);
@@ -26,6 +20,12 @@ namespace wrapper
 	}
 
 	void Thread::CallbackDefault(std::exception_ptr)
+	{
+	}
+
+	Thread::ThreadRoutine::ThreadRoutine(const Func& f, const FuncExcept& ex)
+		: m_routine(f)
+		, m_callback(ex)
 	{
 	}
 

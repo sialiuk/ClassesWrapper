@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "Thread.h"
+#include <boost\thread.hpp>
 
 void Exceptioncallback(std::exception_ptr ptr)
 {
@@ -34,12 +35,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	std::cout << thread3.GetThreadId() << std::endl;
 
 	wrapper::Thread threadSuspend([](){ std::cout << "789 "; throw std::runtime_error("Error!!!!!"); }
-									, 0, Exceptioncallback);
+										, CREATE_SUSPENDED);
 	threadSuspend.StartThread();
 	threadSuspend.Join();
 	std::cout << threadSuspend.GetThreadId() << std::endl;
-
-	
 	return 0;
 }
 
