@@ -5,26 +5,36 @@
 
 namespace wrapper
 {
+	Thread::ThreadRoutine::ThreadRoutine(const Func& f, const FuncExcept& ex)
+		: m_routine(f)
+		, m_callback(ex)
+	{
+	}
+
 	unsigned int Thread::Callable(void* ptr)
 	{
-		Func* f = static_cast<Func*>(ptr);
+		ThreadRoutine* f = static_cast<ThreadRoutine*>(ptr);
 		try
 		{
-			(*f)();
+			f->m_routine();
 		}
 		catch(...)
 		{
-
+			f->m_callback(std::current_exception());
 		}
 		return 0;
 	}
 
-	Thread::Thread(const Func& f, unsigned initFlag)
-		: m_routine(f)
+	void Thread::CallbackDefault(std::exception_ptr)
+	{
+	}
+
+	Thread::Thread(const Func& f, unsigned initFlag, const FuncExcept& ex)
+		: m_threadRoutine(f, ex)
 		, m_threadHandle(NULL)
 		, m_threadId(0)
 	{
-		m_threadHandle = (HANDLE)_beginthreadex(nullptr, 0, Thread::Callable, &m_routine, initFlag, &m_threadId);
+		m_threadHandle = (HANDLE)_beginthreadex(nullptr, 0, Thread::Callable, &m_threadRoutine, initFlag, &m_threadId);
 		if(!m_threadHandle)
 		{
 			throw std::runtime_error("Error create thread");
@@ -38,7 +48,7 @@ namespace wrapper
 
 	void Thread::Swap(Thread& other)
 	{
-		std::swap(m_routine, other.m_routine);
+		std::swap(m_threadRoutine, other.m_threadRoutine);
 		std::swap(m_threadHandle, other.m_threadHandle);
 		std::swap(m_threadId, other.m_threadId);
 	}
@@ -46,6 +56,20 @@ namespace wrapper
 	void Thread::Join()
 	{
 		WaitForSingleObject(m_threadHandle, INFINITE);
+	}
+
+	bool Thread::Joinable() const
+	{
+		DWORD exitCode(0);
+		GetExitCodeThread(m_threadHandle, &exitCode);
+		if(exitCode == STILL_ACTIVE)
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	unsigned Thread::GetThreadId() const
