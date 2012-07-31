@@ -5,8 +5,8 @@
 
 namespace wrapper
 {
-	boost::thread thr();
 	typedef boost::function<void ()> Func;
+
 	class Thread
 	{
 	public:
@@ -14,6 +14,7 @@ namespace wrapper
 		void Join();
 	private:
 		static unsigned int __stdcall Callable(void*);
+	private:
 		Func m_routine;
 		HANDLE m_threadHandle;
 	};

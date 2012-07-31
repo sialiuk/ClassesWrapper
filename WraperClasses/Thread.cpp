@@ -31,6 +31,6 @@ namespace wrapper
 
 	void Thread::Join()
 	{
-		DWORD a = WaitForSingleObject(m_threadHandle, INFINITE);
+		WaitForSingleObject(m_threadHandle, INFINITE);
 	}
 }
