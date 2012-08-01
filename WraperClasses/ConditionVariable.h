@@ -8,10 +8,12 @@ namespace wrapper
 	class ConditionVariable
 		: private boost::noncopyable
 	{
-		typedef UniqueLock<Mutex> Lock;
+		typedef UniqueLock<Mutex> Locker;
 	public:
 		ConditionVariable();
-		void Wait(Lock&);
+		void Wait(Locker&);
+		template<typename Predicate>
+			void Wait(Locker&, Predicate);
 		void NotifyOne();
 		void NotifyAll();
 	private:

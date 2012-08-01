@@ -2,21 +2,32 @@
 
 namespace wrapper
 {
-	template<typename Lock>
+	template<typename T>
 	class UniqueLock
 	{
 		friend class ConditionVariable;
 	public:
-		UniqueLock(Lock& m)
+		UniqueLock(T& m)
 			: m_mutex(m)
 		{
 			m_mutex.Lock();
 		}
+
 		~UniqueLock()
 		{
 			m_mutex.UnLock();
 		}
+
+		void Lock()
+		{
+			m_mutex.Lock();
+		}
+
+		void UnLock()
+		{
+			m_mutex.UnLock();
+		}
 	private:
-		Lock& m_mutex;
+		T& m_mutex;
 	};
 }

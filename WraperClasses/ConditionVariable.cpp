@@ -8,9 +8,18 @@ namespace wrapper
 		InitializeConditionVariable(&m_condVariable);
 	}
 
-	void ConditionVariable::Wait(Lock& lock)
+	void ConditionVariable::Wait(Locker& lock)
 	{
 		SleepConditionVariableCS(&m_condVariable, &lock.m_mutex.m_section, INFINITE);
+	}
+
+	template<typename Predicate>
+	void ConditionVariable::Wait(Locker& lock, Predicate pred)
+	{
+		while(!pred())
+		{
+			Wait(lock);
+		}
 	}
 
 	void ConditionVariable::NotifyOne()

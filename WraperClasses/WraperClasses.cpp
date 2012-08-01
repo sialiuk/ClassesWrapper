@@ -6,6 +6,9 @@
 #include "Mutex.h"
 #include "UniqueLock.h"
 #include "ConditionVariable.h"
+#include <boost\thread\shared_mutex.hpp>
+
+boost::shared_mutex m;
 
 namespace
 {
@@ -31,9 +34,14 @@ int _tmain(int argc, _TCHAR* argv[])
 	wrapper::Thread thread1(
 		[]()
 		{
-			wrapper::UniqueLock<wrapper::Mutex> lock(mutex);
-			m_cond.Wait(lock);
-			std::cout << count << std::endl; 
+			{
+				wrapper::UniqueLock<wrapper::Mutex> lock(mutex);
+				m_cond.Wait(lock);
+			}
+			{
+				wrapper::UniqueLock<wrapper::Mutex> lock(mutex);
+				std::cout << count << std::endl; 
+			}
 		});
 	wrapper::Thread thread2(
 		[]()
