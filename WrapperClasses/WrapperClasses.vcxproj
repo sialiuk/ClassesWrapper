@@ -81,6 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConditionVariable.h" />
+    <ClInclude Include="ConditionVariableKernel.h" />
     <ClInclude Include="Mutex.h" />
     <ClInclude Include="MutexKernel.h" />
     <ClInclude Include="stdafx.h" />
@@ -90,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConditionVariable.cpp" />
+    <ClCompile Include="ConditionVariableKernel.cpp" />
     <ClCompile Include="Mutex.cpp" />
     <ClCompile Include="MutexKernel.cpp" />
     <ClCompile Include="stdafx.cpp">
