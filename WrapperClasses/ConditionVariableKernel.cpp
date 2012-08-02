@@ -4,6 +4,17 @@
 
 namespace wrapper
 {
+	ConditionVariableKernel::Relocker::Relocker(Locker& l)
+		:m_lock(l)
+	{
+		m_lock.UnLock();
+	}
+
+	ConditionVariableKernel::Relocker::~Relocker()
+	{
+		m_lock.Lock();
+	}
+
 	ConditionVariableKernel::ConditionVariableKernel()
 		: m_eventManualReset( m_h[0])
 		, m_eventAutomaticReset( m_h[1])
@@ -19,7 +30,6 @@ namespace wrapper
 			CloseHandle(m_eventManualReset);
 			throw std::runtime_error("Create ConditionVariable failed");	
 		}
-		
 	}
 		
 	ConditionVariableKernel::~ConditionVariableKernel()
@@ -30,9 +40,8 @@ namespace wrapper
 
 	void ConditionVariableKernel::Wait(Locker& lock)
 	{
-		lock.UnLock();
+		Relocker relock(lock);
 		WaitForMultipleObjects(2, m_h, FALSE, INFINITE);
-		lock.Lock();
 	}
 	
 	void ConditionVariableKernel::NotifyOne()
@@ -42,6 +51,6 @@ namespace wrapper
 
 	void ConditionVariableKernel::NotifyAll()
 	{
-		SetEvent(m_eventManualReset);
+		PulseEvent(m_eventManualReset);
 	}
 }

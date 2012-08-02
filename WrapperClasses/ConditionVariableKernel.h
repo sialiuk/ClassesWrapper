@@ -5,8 +5,19 @@
 namespace wrapper
 {
 	class ConditionVariableKernel
+		: private boost::noncopyable
 	{
 		typedef UniqueLock<MutexKernel> Locker;
+		
+		class Relocker
+		{
+		public:
+			Relocker(Locker&);
+			~Relocker();
+		private:
+			Locker& m_lock;
+		};
+		
 	public:
 		ConditionVariableKernel();
 		~ConditionVariableKernel();
