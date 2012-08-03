@@ -4,8 +4,8 @@
 #include "stdafx.h"
 #include <vector>
 #include "..\WrapperClasses\Thread.h"
-#include "..\WrapperClasses\MutexKernel.h"
-#include "..\WrapperClasses\ConditionVariableKernel.h"
+#include "..\WrapperClasses\Mutex.h"
+#include "..\WrapperClasses\ConditionVariable.h"
 
 namespace
 {
@@ -21,8 +21,8 @@ namespace
 		std::cout << str << std::endl;
 	}
 
-	wrapper::MutexKernel g_mutex, g_cmutex;
-	wrapper::ConditionVariableKernel g_printVariable, g_writeVariable;
+	wrapper::Mutex g_mutex, g_cmutex;
+	wrapper::ConditionVariable g_printVariable, g_writeVariable;
 }
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -30,70 +30,69 @@ int _tmain(int argc, _TCHAR* argv[])
 	typedef std::shared_ptr<wrapper::Thread> ThreadPtr;
 	std::vector<ThreadPtr> pool;
 	
-	pool.push_back(std::make_shared<wrapper::Thread>([&]()
+	pool.push_back(std::make_shared<wrapper::Thread>([]()
 		{
-			wrapper::UniqueLock<wrapper::MutexKernel> lock(g_mutex);
+			wrapper::UniqueLock<wrapper::Mutex> lock(g_mutex);
 			g_printVariable.Wait(lock);
 			Print();
 	}));
 
-	pool.push_back(std::make_shared<wrapper::Thread>([&]()
+	pool.push_back(std::make_shared<wrapper::Thread>([]()
 		{
-			wrapper::UniqueLock<wrapper::MutexKernel> lock(g_mutex);
+			wrapper::UniqueLock<wrapper::Mutex> lock(g_mutex);
 			g_printVariable.Wait(lock);
 			Print();
 	}));
 
-	pool.push_back(std::make_shared<wrapper::Thread>([&]()
+	pool.push_back(std::make_shared<wrapper::Thread>([]()
 		{
-			wrapper::UniqueLock<wrapper::MutexKernel> lock(g_mutex);
+			wrapper::UniqueLock<wrapper::Mutex> lock(g_mutex);
 			g_printVariable.Wait(lock);
 			Print();
 	}));
 
-	pool.push_back(std::make_shared<wrapper::Thread>([&]()
+	pool.push_back(std::make_shared<wrapper::Thread>([]()
 		{
-			wrapper::UniqueLock<wrapper::MutexKernel> lock(g_mutex);
+			wrapper::UniqueLock<wrapper::Mutex> lock(g_mutex);
 			g_printVariable.Wait(lock);
 			Print();
 	}));
 
-	pool.push_back(std::make_shared<wrapper::Thread>([&]()
+	pool.push_back(std::make_shared<wrapper::Thread>([]()
 		{
-			wrapper::UniqueLock<wrapper::MutexKernel> lock(g_mutex);
+			wrapper::UniqueLock<wrapper::Mutex> lock(g_mutex);
 			g_printVariable.Wait(lock);
 			Print();
 	}));
 
-	pool.push_back(std::make_shared<wrapper::Thread>([&]()
+	pool.push_back(std::make_shared<wrapper::Thread>([]()
 		{
-			wrapper::UniqueLock<wrapper::MutexKernel> lock(g_mutex);
+			wrapper::UniqueLock<wrapper::Mutex> lock(g_mutex);
 			g_printVariable.Wait(lock);
 			Print();
 	}));
 
-	pool.push_back(std::make_shared<wrapper::Thread>([&]()
+	pool.push_back(std::make_shared<wrapper::Thread>([]()
 		{
-			wrapper::UniqueLock<wrapper::MutexKernel> lock(g_mutex);
+			wrapper::UniqueLock<wrapper::Mutex> lock(g_mutex);
 			g_printVariable.Wait(lock);
 			Print();
 	}));
 
-	pool.push_back(std::make_shared<wrapper::Thread>([&]()
+	pool.push_back(std::make_shared<wrapper::Thread>([]()
 		{
-			wrapper::UniqueLock<wrapper::MutexKernel> lock(g_cmutex);
+			wrapper::UniqueLock<wrapper::Mutex> lock(g_cmutex);
 			g_writeVariable.Wait(lock);
 			Write("test");
 			g_printVariable.NotifyAll();
 	}));
 
-	pool.push_back(std::make_shared<wrapper::Thread>([&]()
+	pool.push_back(std::make_shared<wrapper::Thread>([]()
 		{
-			wrapper::UniqueLock<wrapper::MutexKernel> lock(g_cmutex);
+			wrapper::UniqueLock<wrapper::Mutex> lock(g_cmutex);
 			Write("Crash ");
 			g_writeVariable.NotifyOne();
 	}));
-
 
 	for(size_t i = 0; i != pool.size(); ++i)
 	{
