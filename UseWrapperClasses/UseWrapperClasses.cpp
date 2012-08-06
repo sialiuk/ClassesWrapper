@@ -34,7 +34,7 @@ namespace
 	auto funcWriteLast = []()
 	{
 		wrapper::UniqueLock<wrapper::Mutex> lock(g_cmutex);
-		g_writeVariable.TimedWait(lock, 1000000);
+		g_writeVariable.TimedWait(lock, 1000);
 		Write("test");
 		g_printVariable.NotifyAll();
 	};

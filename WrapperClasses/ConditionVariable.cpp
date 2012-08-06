@@ -12,7 +12,7 @@ namespace wrapper
 
 	void ConditionVariable::Wait(Locker& lock)
 	{
-		bool result = SleepConditionVariableCS(&m_condVariable, &lock.m_mutex.m_section, INFINITE);
+		BOOL result = SleepConditionVariableCS(&m_condVariable, &lock.m_mutex.m_section, INFINITE);
 		if(!result)
 		{
 			throw std::runtime_error((boost::format("Wait Conditionvariable is failed, error: %1%") 
@@ -22,7 +22,7 @@ namespace wrapper
 
 	bool ConditionVariable::TimedWait(Locker& lock, unsigned long milliseconds)
 	{
-		bool result = SleepConditionVariableCS(&m_condVariable, &lock.m_mutex.m_section, milliseconds);
+		BOOL result = SleepConditionVariableCS(&m_condVariable, &lock.m_mutex.m_section, milliseconds);
 		if(!result)
 		{
 			DWORD error = GetLastError();
@@ -32,7 +32,7 @@ namespace wrapper
 										% error).str());
 			}
 		}
-		return result;
+		return (result ? true : false);
 	}
 
 	template<typename Predicate>
