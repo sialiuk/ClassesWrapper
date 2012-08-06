@@ -22,6 +22,7 @@ namespace wrapper
 		ConditionVariableKernel();
 		~ConditionVariableKernel();
 		void Wait(Locker&);
+		bool TimedWait(Locker&, unsigned long);
 		void NotifyOne();
 		void NotifyAll();
 	private:

@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "ConditionVariable.h"
+#include <boost\format.hpp>
+#include <stdexcept>
 
 namespace wrapper
 {
@@ -10,7 +12,27 @@ namespace wrapper
 
 	void ConditionVariable::Wait(Locker& lock)
 	{
-		SleepConditionVariableCS(&m_condVariable, &lock.m_mutex.m_section, INFINITE);
+		bool result = SleepConditionVariableCS(&m_condVariable, &lock.m_mutex.m_section, INFINITE);
+		if(!result)
+		{
+			throw std::runtime_error((boost::format("Wait Conditionvariable is failed, error: %1%") 
+										% GetLastError()).str());
+		}
+	}
+
+	bool ConditionVariable::TimedWait(Locker& lock, unsigned long milliseconds)
+	{
+		bool result = SleepConditionVariableCS(&m_condVariable, &lock.m_mutex.m_section, milliseconds);
+		if(!result)
+		{
+			DWORD error = GetLastError();
+			if(error != ERROR_TIMEOUT)
+			{
+				throw std::runtime_error((boost::format("Wait Conditionvariable is failed, error: %1%") 
+										% error).str());
+			}
+		}
+		return result;
 	}
 
 	template<typename Predicate>

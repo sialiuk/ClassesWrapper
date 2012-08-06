@@ -27,8 +27,9 @@ namespace wrapper
 		void Join();
 		bool Joinable() const;
 		unsigned GetThreadId() const;
+		unsigned long Suspend();
 		void Interrupt();
-		void StartThread();
+		unsigned long StartThread();
 	private:
 		static unsigned int __stdcall Callable(void*);
 		static void CallbackDefault(std::exception_ptr);

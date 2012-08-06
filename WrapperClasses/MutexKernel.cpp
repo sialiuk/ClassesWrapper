@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "MutexKernel.h"
+#include <boost\format.hpp>
 #include <stdexcept>
 
 namespace wrapper
@@ -10,7 +11,8 @@ namespace wrapper
 		m_mtx = CreateMutex(NULL, FALSE, NULL);
 		if(m_mtx == NULL)
 		{
-			throw std::runtime_error("Create MutexKernel failed");
+			throw std::runtime_error((boost::format("Create mutex is failed, error: %1%") 
+										% GetLastError()).str());
 		}
 	}
 
@@ -21,11 +23,21 @@ namespace wrapper
 
 	void MutexKernel::Lock()
 	{
-		WaitForSingleObject(m_mtx, INFINITE);
+		DWORD result = WaitForSingleObject(m_mtx, INFINITE);
+		if(result == WAIT_FAILED)
+		{
+			throw std::runtime_error((boost::format("Capture of mutex is failed, error: %1%")
+										% GetLastError()).str());
+		}
 	}
 
 	void MutexKernel::UnLock()
 	{
-		ReleaseMutex(m_mtx);
+		BOOL result = ReleaseMutex(m_mtx);
+		if(!result)
+		{
+			throw std::runtime_error((boost::format("Release mutex is failed, error: %1%") 
+										% GetLastError()).str());
+		}
 	}
 }

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Thread.h"
 #include <process.h>
+#include <boost\format.hpp>
 #include <stdexcept>
 
 namespace wrapper
@@ -37,7 +38,8 @@ namespace wrapper
 		m_threadHandle = (HANDLE)_beginthreadex(nullptr, 0, Thread::Callable, &m_threadRoutine, initFlag, &m_threadId);
 		if(!m_threadHandle)
 		{
-			throw std::runtime_error("Error create thread");
+			throw std::runtime_error((boost::format("Create thread is failed, error: %1%") 
+										% GetLastError()).str());
 		}
 	}
 
@@ -55,21 +57,29 @@ namespace wrapper
 
 	void Thread::Join()
 	{
-		WaitForSingleObject(m_threadHandle, INFINITE);
+		DWORD result = WaitForSingleObject(m_threadHandle, INFINITE);
+		if(result == WAIT_FAILED)
+		{
+			throw std::runtime_error((boost::format("Waiting for thread is failed, error: %1%")
+										% GetLastError()).str());
+		}
 	}
 
 	bool Thread::Joinable() const
 	{
 		DWORD exitCode(0);
-		GetExitCodeThread(m_threadHandle, &exitCode);
+		BOOL result = GetExitCodeThread(m_threadHandle, &exitCode);
+		if(!result)
+		{
+			throw std::runtime_error((boost::format("Get exit code thread is failed, error: %1%") 
+										% GetLastError()).str());
+		}
+
 		if(exitCode == STILL_ACTIVE)
 		{
 			return false;
 		}
-		else
-		{
-			return true;
-		}
+		return true;
 	}
 
 	unsigned Thread::GetThreadId() const
@@ -77,13 +87,25 @@ namespace wrapper
 		return m_threadId;
 	}
 
-	void Thread::Interrupt()
+	unsigned long Thread::Suspend()
 	{
-		SuspendThread(m_threadHandle);
+		return SuspendThread(m_threadHandle);
 	}
 
-	void Thread::StartThread()
+	void Thread::Interrupt()
 	{
-		ResumeThread(m_threadHandle);
+		if(!Joinable())
+		{
+			if(!TerminateThread(m_threadHandle, -1))
+			{
+				throw std::runtime_error((boost::format("Terminate thread is failed, error: %1%") 
+										% GetLastError()).str());
+			}
+		}
+	}
+
+	unsigned long Thread::StartThread()
+	{
+		return ResumeThread(m_threadHandle);
 	}
 }

@@ -12,6 +12,7 @@ namespace wrapper
 	public:
 		ConditionVariable();
 		void Wait(Locker&);
+		bool TimedWait(Locker&, unsigned long);
 		template<typename Predicate>
 			void Wait(Locker&, Predicate);
 		void NotifyOne();

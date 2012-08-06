@@ -7,7 +7,7 @@ namespace wrapper
 	{
 		friend class ConditionVariable;
 	public:
-		UniqueLock(T& m)
+		explicit UniqueLock(T& m)
 			: m_mutex(m)
 		{
 			m_mutex.Lock();

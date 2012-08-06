@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ConditionVariableKernel.h"
 #include <stdexcept>
+#include <boost\format.hpp>
 
 namespace wrapper
 {
@@ -22,13 +23,15 @@ namespace wrapper
 		m_eventManualReset = CreateEvent(NULL, TRUE, FALSE, NULL);
 		if(m_eventManualReset == NULL)
 		{
-			throw std::runtime_error("Create ConditionVariable failed");	
+			throw std::runtime_error((boost::format("Create ConditionVariable is failed, error: %1%") 
+										% GetLastError()).str());
 		}
 		m_eventAutomaticReset = CreateEvent(NULL, FALSE, FALSE, NULL);
 		if(m_eventAutomaticReset == NULL)
 		{
 			CloseHandle(m_eventManualReset);
-			throw std::runtime_error("Create ConditionVariable failed");	
+			throw std::runtime_error((boost::format("Create ConditionVariable is failed, error: %1%") 
+										% GetLastError()).str());	
 		}
 	}
 		
@@ -41,16 +44,47 @@ namespace wrapper
 	void ConditionVariableKernel::Wait(Locker& lock)
 	{
 		Relocker relock(lock);
-		WaitForMultipleObjects(2, m_h, FALSE, INFINITE);
+		DWORD result = WaitForMultipleObjects(2, m_h, FALSE, INFINITE);
+		if( result == WAIT_FAILED)
+		{
+			throw std::runtime_error((boost::format("Waiting ConditionVariable is failed, error: %1%")
+										% GetLastError()).str());	
+		}
 	}
 	
+	bool ConditionVariableKernel::TimedWait(Locker& lock, unsigned long milliseconds)
+	{
+		Relocker relock(lock);
+		DWORD result = WaitForMultipleObjects(2, m_h, FALSE, milliseconds);
+		if(result == WAIT_TIMEOUT)
+		{
+			return false;
+		}
+		if( result == WAIT_FAILED)
+		{
+			throw std::runtime_error((boost::format("Waiting ConditionVariable is failed, error: %1%")
+										% GetLastError()).str());	
+		}
+		return true;
+	}
+
 	void ConditionVariableKernel::NotifyOne()
 	{
-		SetEvent(m_eventAutomaticReset);
+		BOOL result = SetEvent(m_eventAutomaticReset);
+		if(!result)
+		{
+			throw std::runtime_error((boost::format("NotifyOne is failed, error: %1%")
+										% GetLastError()).str());
+		}
 	}
 
 	void ConditionVariableKernel::NotifyAll()
 	{
-		PulseEvent(m_eventManualReset);
+		BOOL result = PulseEvent(m_eventManualReset);
+		if(!result)
+		{
+			throw std::runtime_error((boost::format("NotifyAll is failed, error: %1%")
+										% GetLastError()).str());
+		}
 	}
 }
